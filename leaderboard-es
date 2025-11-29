@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Tabla de Líderes - Akashic Works</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Georgia,serif;background:linear-gradient(135deg,#0a0e27,#1a1034,#2d1b4e);min-height:100vh;color:#e8e8f0;display:flex;flex-direction:column;align-items:center;padding:8px}
+.title{font-size:1.4em;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center}
+.subtitle{color:#d4af37;margin-bottom:10px;font-size:0.8em}
+.box{background:rgba(255,255,255,0.05);border:2px solid rgba(212,175,55,0.5);border-radius:12px;padding:12px;width:calc(100% - 16px);max-width:400px;margin-bottom:10px}
+.hidden{display:none!important}
+.back{padding:4px 8px;background:rgba(255,255,255,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:8px;color:#ffd700;text-decoration:none;font-size:0.7em}
+.top-bar{width:calc(100% - 16px);max-width:400px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px}
+.tab{padding:8px 12px;background:rgba(255,255,255,0.05);border:2px solid rgba(212,175,55,0.3);border-radius:8px;color:#b8b8cc;cursor:pointer;font-size:0.75em;font-family:Georgia,serif;transition:all 0.2s}
+.tab:hover{border-color:#ffd700;color:#ffd700}
+.tab.active{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1034;border-color:#ffd700;font-weight:bold}
+.game-selector{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.game-btn{padding:8px 14px;background:rgba(255,255,255,0.05);border:2px solid rgba(212,175,55,0.3);border-radius:20px;color:#b8b8cc;cursor:pointer;font-size:0.7em;font-family:Georgia,serif;white-space:nowrap;transition:all 0.2s}
+.game-btn:hover{border-color:#ffd700;color:#ffd700}
+.game-btn.active{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1034;border-color:#ffd700}
+.leaderboard{margin-top:10px}
+.lb-header{display:grid;grid-template-columns:40px 1fr 80px;gap:8px;padding:8px 12px;background:rgba(255,215,0,0.15);border-radius:8px;margin-bottom:8px;font-size:0.75em;color:#ffd700;font-weight:bold}
+.lb-row{display:grid;grid-template-columns:40px 1fr 80px;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.2);border-radius:8px;margin-bottom:6px;align-items:center;transition:all 0.2s}
+.lb-row:hover{background:rgba(255,255,255,0.08);border-color:rgba(212,175,55,0.4)}
+.lb-row.top1{background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,140,0,0.1));border-color:#ffd700}
+.lb-row.top2{background:linear-gradient(135deg,rgba(192,192,192,0.15),rgba(169,169,169,0.1));border-color:#c0c0c0}
+.lb-row.top3{background:linear-gradient(135deg,rgba(205,127,50,0.15),rgba(184,115,51,0.1));border-color:#cd7f32}
+.lb-row.you{background:linear-gradient(135deg,rgba(138,43,226,0.2),rgba(75,0,130,0.1));border:2px solid #8a2be2}
+.rank{font-weight:bold;font-size:1.1em;text-align:center}
+.rank.gold{color:#ffd700}
+.rank.silver{color:#c0c0c0}
+.rank.bronze{color:#cd7f32}
+.medal{font-size:1.3em}
+.player-info{display:flex;flex-direction:column;gap:2px}
+.player-name{color:#e8e8f0;font-size:0.9em;font-weight:bold}
+.player-games{color:#b8b8cc;font-size:0.7em}
+.score{text-align:right;color:#ffd700;font-weight:bold;font-size:1em}
+.score span{display:block;color:#b8b8cc;font-size:0.65em;font-weight:normal}
+.empty-state{text-align:center;padding:30px 20px;color:#b8b8cc}
+.empty-state .icon{font-size:3em;margin-bottom:10px}
+.empty-state p{font-size:0.85em;line-height:1.5}
+.your-stats{background:linear-gradient(135deg,rgba(138,43,226,0.15),rgba(75,0,130,0.1));border:2px solid rgba(138,43,226,0.5);border-radius:10px;padding:12px;margin-bottom:12px}
+.your-stats h3{color:#ffd700;font-size:0.9em;margin-bottom:8px;text-align:center}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat-item{text-align:center}
+.stat-item b{display:block;color:#ffd700;font-size:1.2em}
+.stat-item span{color:#b8b8cc;font-size:0.65em}
+.info-box{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:10px;margin-top:12px;font-size:0.75em;color:#b8b8cc;text-align:center}
+.info-box b{color:#ffd700}
+.btn{width:100%;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1034;border:none;padding:10px;border-radius:12px;font-size:0.85em;font-weight:bold;cursor:pointer;margin-top:8px;font-family:Georgia,serif}
+.btn:active{transform:scale(0.98)}
+.btn2{background:linear-gradient(135deg,#8a2be2,#4b0082);color:#fff}
+.pin-box{max-width:340px}
+.pin-title{color:#ffd700;font-size:1em;text-align:center;margin-bottom:4px}
+.pin-sub{color:#b8b8cc;text-align:center;margin-bottom:12px;font-size:0.75em}
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(212,175,55,0.5)}
+.dot.on{background:#ffd700;border-color:#ffd700}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:180px;margin:0 auto 10px}
+.key{aspect-ratio:1;font-size:1.1em;border:2px solid rgba(212,175,55,0.3);background:rgba(255,255,255,0.05);color:#e8e8f0;border-radius:6px;cursor:pointer}
+.key:active{transform:scale(0.95)}
+.key.empty{visibility:hidden}
+.msg{text-align:center;min-height:16px;font-size:0.75em}
+.msg.err{color:#ff6b6b}
+.msg.ok{color:#4ecdc4}
+.toggle{text-align:center;margin-top:10px;color:#b8b8cc;font-size:0.75em}
+.toggle span{color:#ffd700;cursor:pointer;text-decoration:underline}
+.name-input{width:100%;padding:10px;background:rgba(255,255,255,0.1);border:2px solid rgba(212,175,55,0.5);border-radius:8px;color:#e8e8f0;font-size:1em;font-family:Georgia,serif;margin-bottom:10px;text-align:center}
+.name-input:focus{outline:none;border-color:#ffd700}
+.name-input::placeholder{color:#888}
+</style>
+</head>
+<body>
+<div class="top-bar">
+<a href="https://hooporiapr-oss.github.io/akashic-works/" class="back">← Inicio</a>
+<span style="color:#ffd700;font-size:0.8em">🏆 Líderes</span>
+</div>
+<div class="title">Tabla de Líderes</div>
+<div class="subtitle">Puerto Rico</div>
+
+<!-- Login Box -->
+<div class="box pin-box" id="loginBox">
+<div class="pin-title">Ingresa tu PIN</div>
+<div class="pin-sub">Escribe tu PIN de 4 dígitos para ver la tabla</div>
+<div class="dots"><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div></div>
+<div class="keypad" id="loginPad"></div>
+<div class="msg" id="loginMsg"></div>
+<div class="toggle">¿No tienes cuenta? <span id="toCreate">Crear PIN</span></div>
+</div>
+
+<!-- Create Box -->
+<div class="box pin-box hidden" id="createBox">
+<div class="pin-title" id="createTitle">Crear PIN</div>
+<div class="pin-sub" id="createSub">Escoge un PIN de 4 dígitos</div>
+<div class="dots"><div class="dot" id="c1"></div><div class="dot" id="c2"></div><div class="dot" id="c3"></div><div class="dot" id="c4"></div></div>
+<div class="keypad" id="createPad"></div>
+<div class="msg" id="createMsg"></div>
+<div class="toggle">¿Ya tienes PIN? <span id="toLogin">Entrar</span></div>
+</div>
+
+<!-- Name Setup Box -->
+<div class="box pin-box hidden" id="nameBox">
+<div class="pin-title">Nombre de Usuario</div>
+<div class="pin-sub">Escoge un nombre para la tabla de líderes</div>
+<input type="text" class="name-input" id="nameInput" placeholder="Tu nombre" maxlength="15">
+<button class="btn" id="saveNameBtn">Guardar Nombre</button>
+<div class="msg" id="nameMsg"></div>
+</div>
+
+<!-- Main Leaderboard -->
+<div class="box hidden" id="mainBox">
+<!-- Your Stats -->
+<div class="your-stats">
+<h3>📊 Tus Estadísticas</h3>
+<div class="stats-grid">
+<div class="stat-item"><b id="yourRank">--</b><span>Ranking</span></div>
+<div class="stat-item"><b id="yourScore">0</b><span>Puntos</span></div>
+<div class="stat-item"><b id="yourGames">0</b><span>Juegos</span></div>
+</div>
+</div>
+
+<!-- Time Period Tabs -->
+<div class="tabs">
+<button class="tab active" data-period="all">Todo</button>
+<button class="tab" data-period="month">Este Mes</button>
+<button class="tab" data-period="week">Esta Semana</button>
+<button class="tab" data-period="today">Hoy</button>
+</div>
+
+<!-- Game Selector -->
+<div class="game-selector" id="gameSelector">
+<button class="game-btn active" data-game="all">🏆 Total</button>
+<button class="game-btn" data-game="number">🔢 Números</button>
+<button class="game-btn" data-game="sequence">🎹 Secuencia</button>
+<button class="game-btn" data-game="match">🃏 Parejas</button>
+<button class="game-btn" data-game="visual">👁️ Visual</button>
+<button class="game-btn" data-game="reaction">⚡ Reacción</button>
+<button class="game-btn" data-game="aim">🎯 Puntería</button>
+<button class="game-btn" data-game="color">🎨 Colores</button>
+<button class="game-btn" data-game="odd">🔍 Diferente</button>
+<button class="game-btn" data-game="pattern">🧩 Patrón</button>
+<button class="game-btn" data-game="word">📝 Sopa</button>
+</div>
+
+<!-- Leaderboard -->
+<div class="leaderboard" id="leaderboard">
+<div class="lb-header">
+<span>#</span>
+<span>Jugador</span>
+<span style="text-align:right">Puntos</span>
+</div>
+<div id="lbContent"></div>
+</div>
+
+<div class="info-box">
+<b>🔒 Privacidad:</b> Solo tu nombre y puntos son visibles. Tu PIN nunca se comparte.
+</div>
+
+<button class="btn btn2" id="logoutBtn">Salir</button>
+</div>
+
+<script>
+(function(){
+    var PK = "aklb1_pins";
+    var UK = "aklb1_users";
+    var SK = "aklb1_scores";
+    
+    var currentPin = "";
+    var currentUser = null;
+    var selectedPeriod = "all";
+    var selectedGame = "all";
+    
+    function $(id) { return document.getElementById(id); }
+    
+    function hash(p) {
+        var h = 0;
+        var s = p + "aklb1";
+        for (var i = 0; i < s.length; i++) {
+            h = ((h << 5) - h) + s.charCodeAt(i);
+            h = h & h;
+        }
+        return h.toString(36);
+    }
+    
+    function getPins() {
+        try { return JSON.parse(localStorage.getItem(PK)) || {}; }
+        catch (e) { return {}; }
+    }
+    
+    function savePins(p) { localStorage.setItem(PK, JSON.stringify(p)); }
+    
+    function checkPin(p) { return !!getPins()[hash(p)]; }
+    
+    function savePin(p) {
+        var pins = getPins();
+        pins[hash(p)] = { created: Date.now() };
+        savePins(pins);
+    }
+    
+    function getUsers() {
+        try { return JSON.parse(localStorage.getItem(UK)) || {}; }
+        catch (e) { return {}; }
+    }
+    
+    function saveUsers(u) { localStorage.setItem(UK, JSON.stringify(u)); }
+    
+    function getUser(pinHash) {
+        return getUsers()[pinHash] || null;
+    }
+    
+    function saveUser(pinHash, userData) {
+        var users = getUsers();
+        users[pinHash] = userData;
+        saveUsers(users);
+    }
+    
+    function getAllScores() {
+        try { return JSON.parse(localStorage.getItem(SK)) || {}; }
+        catch (e) { return {}; }
+    }
+    
+    function saveAllScores(s) { localStorage.setItem(SK, JSON.stringify(s)); }
+    
+    function importUserScores(pinHash) {
+        var games = {
+            number: ["nmen1_stats_", "nmes1_stats_"],
+            sequence: ["smen1_stats_", "smes1_stats_"],
+            match: ["mmen1_stats_", "mmpr1_stats_", "mmpr2_stats_"],
+            visual: ["vmen1_stats_", "vmes1_stats_"],
+            reaction: ["rten1_stats_", "rtes1_stats_"],
+            aim: ["aten1_stats_", "ates1_stats_"],
+            color: ["cmen1_stats_", "cmes1_stats_"],
+            odd: ["ooen1_stats_", "ooes1_stats_"],
+            pattern: ["pren1_stats_", "pres1_stats_"],
+            word: ["wsen1_stats_", "wses1_stats_"]
+        };
+        
+        var userScores = { total: 0, games: {}, lastUpdated: Date.now() };
+        
+        for (var game in games) {
+            var prefixes = games[game];
+            var bestScore = 0;
+            var totalGames = 0;
+            
+            for (var i = 0; i < prefixes.length; i++) {
+                try {
+                    var data = JSON.parse(localStorage.getItem(prefixes[i] + pinHash));
+                    if (data) {
+                        if (data.bestScore) bestScore = Math.max(bestScore, data.bestScore);
+                        if (data.bestLevel) bestScore = Math.max(bestScore, data.bestLevel * 10);
+                        if (data.bestMoves) bestScore = Math.max(bestScore, Math.max(0, 100 - data.bestMoves));
+                        if (data.bestTime) bestScore = Math.max(bestScore, Math.max(0, Math.floor(1000 - data.bestTime)));
+                        if (data.games) totalGames += data.games;
+                    }
+                } catch (e) {}
+            }
+            
+            userScores.games[game] = { best: bestScore, played: totalGames };
+            userScores.total += bestScore;
+        }
+        
+        var allScores = getAllScores();
+        allScores[pinHash] = userScores;
+        saveAllScores(allScores);
+        
+        return userScores;
+    }
+    
+    function generateDemoData() {
+        var demoNames = [
+            "BoricuaPro", "MenteRápida", "CerebroBoricua", "ElGenio", "LaEstrella",
+            "PensamientoVeloz", "MemoriaPR", "JugadorTop", "CampeónPR", "MenteAgil",
+            "BoricuaSmart", "ElMaestro", "SuperMente", "ReyDelJuego", "AsPR"
+        ];
+        
+        var demo = [];
+        for (var i = 0; i < 15; i++) {
+            demo.push({
+                name: demoNames[i],
+                score: Math.floor(Math.random() * 500) + 100,
+                games: Math.floor(Math.random() * 50) + 5,
+                isDemo: true
+            });
+        }
+        return demo.sort(function(a, b) { return b.score - a.score; });
+    }
+    
+    function getLeaderboardData(period, game) {
+        var allScores = getAllScores();
+        var users = getUsers();
+        var data = [];
+        
+        for (var pinHash in allScores) {
+            var user = users[pinHash];
+            if (!user) continue;
+            
+            var scoreData = allScores[pinHash];
+            var score = 0;
+            var gamesPlayed = 0;
+            
+            if (game === "all") {
+                score = scoreData.total || 0;
+                for (var g in scoreData.games) {
+                    gamesPlayed += scoreData.games[g].played || 0;
+                }
+            } else if (scoreData.games && scoreData.games[game]) {
+                score = scoreData.games[game].best || 0;
+                gamesPlayed = scoreData.games[game].played || 0;
+            }
+            
+            if (score > 0) {
+                data.push({
+                    pinHash: pinHash,
+                    name: user.name,
+                    score: score,
+                    games: gamesPlayed,
+                    isDemo: false
+                });
+            }
+        }
+        
+        if (data.length < 10) {
+            var demoData = generateDemoData();
+            data = data.concat(demoData.slice(0, 15 - data.length));
+        }
+        
+        data.sort(function(a, b) { return b.score - a.score; });
+        
+        return data.slice(0, 20);
+    }
+    
+    function renderLeaderboard() {
+        var data = getLeaderboardData(selectedPeriod, selectedGame);
+        var content = $("lbContent");
+        var myPinHash = hash(currentPin);
+        
+        if (data.length === 0) {
+            content.innerHTML = '<div class="empty-state"><div class="icon">🏆</div><p>¡No hay puntuaciones aún!<br>Juega para aparecer en la tabla.</p></div>';
+            return;
+        }
+        
+        var html = "";
+        var myRank = -1;
+        
+        for (var i = 0; i < data.length; i++) {
+            var entry = data[i];
+            var rank = i + 1;
+            var isYou = entry.pinHash === myPinHash;
+            
+            if (isYou) myRank = rank;
+            
+            var rowClass = "lb-row";
+            if (rank === 1) rowClass += " top1";
+            else if (rank === 2) rowClass += " top2";
+            else if (rank === 3) rowClass += " top3";
+            if (isYou) rowClass += " you";
+            
+            var rankDisplay = "";
+            if (rank === 1) rankDisplay = '<span class="medal">🥇</span>';
+            else if (rank === 2) rankDisplay = '<span class="medal">🥈</span>';
+            else if (rank === 3) rankDisplay = '<span class="medal">🥉</span>';
+            else rankDisplay = '<span class="rank">' + rank + '</span>';
+            
+            html += '<div class="' + rowClass + '">';
+            html += '<div>' + rankDisplay + '</div>';
+            html += '<div class="player-info">';
+            html += '<span class="player-name">' + entry.name + (isYou ? ' (Tú)' : '') + '</span>';
+            html += '<span class="player-games">' + entry.games + ' juegos</span>';
+            html += '</div>';
+            html += '<div class="score">' + entry.score + '<span>puntos</span></div>';
+            html += '</div>';
+        }
+        
+        content.innerHTML = html;
+        
+        if (myRank > 0) {
+            $("yourRank").textContent = "#" + myRank;
+        } else {
+            $("yourRank").textContent = "--";
+        }
+        
+        var myScores = getAllScores()[myPinHash];
+        if (myScores) {
+            $("yourScore").textContent = myScores.total || 0;
+            var totalGames = 0;
+            for (var g in myScores.games) {
+                totalGames += myScores.games[g].played || 0;
+            }
+            $("yourGames").textContent = totalGames;
+        }
+    }
+    
+    function show(id) {
+        ["loginBox", "createBox", "nameBox", "mainBox"].forEach(function(x) {
+            $(x).classList.add("hidden");
+        });
+        $(id).classList.remove("hidden");
+    }
+    
+    function setDots(pre, n) {
+        for (var i = 1; i <= 4; i++) {
+            var el = $(pre + i);
+            if (el) {
+                if (i <= n) el.classList.add("on");
+                else el.classList.remove("on");
+            }
+        }
+    }
+    
+    function setMsg(id, t, isErr) {
+        var m = $(id);
+        m.textContent = t;
+        m.className = "msg " + (isErr ? "err" : "ok");
+    }
+    
+    var loginPin = "";
+    var createPin = "";
+    var confirmPin = "";
+    var isConfirming = false;
+    
+    function buildKeypad(containerId, onDigit, onDelete) {
+        var container = $(containerId);
+        container.innerHTML = "";
+        
+        for (var i = 1; i <= 9; i++) {
+            (function(digit) {
+                var btn = document.createElement("button");
+                btn.className = "key";
+                btn.textContent = digit;
+                btn.onclick = function() { onDigit(digit); };
+                container.appendChild(btn);
+            })(i);
+        }
+        
+        var empty = document.createElement("button");
+        empty.className = "key empty";
+        container.appendChild(empty);
+        
+        var zero = document.createElement("button");
+        zero.className = "key";
+        zero.textContent = "0";
+        zero.onclick = function() { onDigit(0); };
+        container.appendChild(zero);
+        
+        var del = document.createElement("button");
+        del.className = "key";
+        del.textContent = "←";
+        del.onclick = onDelete;
+        container.appendChild(del);
+    }
+    
+    function setupLogin() {
+        buildKeypad("loginPad", function(digit) {
+            if (loginPin.length < 4) {
+                loginPin += digit;
+                setDots("d", loginPin.length);
+                if (loginPin.length === 4) {
+                    setTimeout(function() {
+                        if (checkPin(loginPin)) {
+                            currentPin = loginPin;
+                            var user = getUser(hash(currentPin));
+                            if (user && user.name) {
+                                currentUser = user;
+                                importUserScores(hash(currentPin));
+                                show("mainBox");
+                                renderLeaderboard();
+                            } else {
+                                show("nameBox");
+                            }
+                        } else {
+                            setMsg("loginMsg", "PIN incorrecto", true);
+                            loginPin = "";
+                            setDots("d", 0);
+                        }
+                    }, 200);
+                }
+            }
+        }, function() {
+            if (loginPin.length > 0) {
+                loginPin = loginPin.slice(0, -1);
+                setDots("d", loginPin.length);
+                $("loginMsg").textContent = "";
+            }
+        });
+    }
+    
+    function setupCreate() {
+        buildKeypad("createPad", function(digit) {
+            if (confirmPin.length < 4) {
+                confirmPin += digit;
+                setDots("c", confirmPin.length);
+                if (confirmPin.length === 4) {
+                    setTimeout(function() {
+                        if (!isConfirming) {
+                            createPin = confirmPin;
+                            confirmPin = "";
+                            isConfirming = true;
+                            $("createTitle").textContent = "Confirmar PIN";
+                            $("createSub").textContent = "Escribe el PIN otra vez";
+                            setDots("c", 0);
+                        } else {
+                            if (confirmPin === createPin) {
+                                savePin(createPin);
+                                currentPin = createPin;
+                                setMsg("createMsg", "¡PIN creado!", false);
+                                setTimeout(function() {
+                                    show("nameBox");
+                                }, 500);
+                            } else {
+                                setMsg("createMsg", "PINs no coinciden", true);
+                                createPin = "";
+                                confirmPin = "";
+                                isConfirming = false;
+                                $("createTitle").textContent = "Crear PIN";
+                                $("createSub").textContent = "Escoge un PIN de 4 dígitos";
+                                setDots("c", 0);
+                            }
+                        }
+                    }, 200);
+                }
+            }
+        }, function() {
+            if (confirmPin.length > 0) {
+                confirmPin = confirmPin.slice(0, -1);
+                setDots("c", confirmPin.length);
+                $("createMsg").textContent = "";
+            }
+        });
+    }
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        setupLogin();
+        setupCreate();
+        
+        $("toCreate").onclick = function() {
+            createPin = "";
+            confirmPin = "";
+            isConfirming = false;
+            $("createTitle").textContent = "Crear PIN";
+            $("createSub").textContent = "Escoge un PIN de 4 dígitos";
+            setDots("c", 0);
+            $("createMsg").textContent = "";
+            show("createBox");
+        };
+        
+        $("toLogin").onclick = function() {
+            loginPin = "";
+            setDots("d", 0);
+            $("loginMsg").textContent = "";
+            show("loginBox");
+        };
+        
+        $("saveNameBtn").onclick = function() {
+            var name = $("nameInput").value.trim();
+            if (name.length < 2) {
+                setMsg("nameMsg", "Nombre muy corto (mín 2)", true);
+                return;
+            }
+            if (name.length > 15) {
+                setMsg("nameMsg", "Nombre muy largo (máx 15)", true);
+                return;
+            }
+            
+            currentUser = { name: name, created: Date.now() };
+            saveUser(hash(currentPin), currentUser);
+            importUserScores(hash(currentPin));
+            show("mainBox");
+            renderLeaderboard();
+        };
+        
+        $("logoutBtn").onclick = function() {
+            loginPin = "";
+            currentPin = "";
+            currentUser = null;
+            setDots("d", 0);
+            show("loginBox");
+        };
+        
+        document.querySelectorAll(".tab").forEach(function(tab) {
+            tab.onclick = function() {
+                document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
+                tab.classList.add("active");
+                selectedPeriod = tab.dataset.period;
+                renderLeaderboard();
+            };
+        });
+        
+        document.querySelectorAll(".game-btn").forEach(function(btn) {
+            btn.onclick = function() {
+                document.querySelectorAll(".game-btn").forEach(function(b) { b.classList.remove("active"); });
+                btn.classList.add("active");
+                selectedGame = btn.dataset.game;
+                renderLeaderboard();
+            };
+        });
+        
+        show("loginBox");
+    });
+})();
+</script>
+</body>
+</html>
